@@ -1,50 +1,37 @@
 import { FormEvent, useState } from 'react';
 import Modal from 'react-modal';
 import closeImg from '../../assets/close.svg';
-import { api } from '../../services/api';
+import { useNotes } from '../../hooks/useNotes';
 import { Container } from './styles';
 
-interface Note {
-    id: number;
-    title: string;
-    description: string;
-    date: string;
-  }
-
-interface newWriteModalProps {
+interface newNoteModalProps {
     isOpen: boolean;
     onRequestClose: () => void;
     onClick: () => void;
-    notes: Note[];
-    onSetNotes: (value: Note[]) => void;
 }
 
-export function NewNoteModal({ isOpen, onRequestClose, onClick, notes, onSetNotes }: newWriteModalProps) {
+function getFormattedCurrentDate() {
+    const currentDateAndHours = new Date().toLocaleDateString("pt-BR") + ' - ' + new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
 
+    return currentDateAndHours;
+}
+
+export function NewNoteModal({ isOpen, onRequestClose, onClick }: newNoteModalProps) {
+
+    const { createNewNote } = useNotes();
     const [ title, setTitle ] = useState<string>('');
     const [ description, setDescription ] = useState<string>('');
 
     async function handleCreateNewNote(event: FormEvent) {
+
         event.preventDefault();
-
-        const currentDateAndHours = new Date().toLocaleDateString("pt-BR") + ' - ' + new Date().toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
-
-        const data = {
+        
+        await createNewNote({
+            id: 0,
             title,
             description,
-            date: currentDateAndHours
-        };
-
-        const response = await api.post('/notes', data);
-        const { note } = response.data;
-
-        const updatedNotes = [
-            note,
-            ...notes
-        ];
-        
-        onSetNotes(updatedNotes);
-        localStorage.setItem('@notes', JSON.stringify(updatedNotes));
+            date: getFormattedCurrentDate()
+        });
 
         setTitle('');
         setDescription('');

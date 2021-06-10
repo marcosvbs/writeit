@@ -1,10 +1,12 @@
 import styled from 'styled-components';
 
 export const Container = styled.header`
-
+    
     max-width: 100%;
 
     padding: 1rem 0;
+
+    background: var(--bege);
 
     box-shadow: 0 2px 6px rgba(15, 14, 14, 0.3);
 

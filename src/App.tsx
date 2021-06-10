@@ -1,61 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { NotesList } from './components/NotesList';
 import { Header } from './components/Header';
 import { GlobalStyle } from './styles/global';
 import Modal from 'react-modal';
 import { NewNoteModal } from './components/NewNoteModal';
-
-interface Note {
-  id: number;
-  title: string;
-  description: string;
-  date: string;
-}
+import { NotesContextProvider } from './hooks/useNotes';
+import { DeleteNoteModal } from './components/DeleteNoteModal';
 
 Modal.setAppElement('#root');
 
 function App() {
-  const [notes, setNotes] = useState<Note[]>([]);
 
-  const [modalIsOpen, setModalIsOpen] = useState<boolean>(false)
+  const [newNoteModalIsOpen, setNewNoteModalIsOpen] = useState<boolean>(false);
+  const [deleteNoteModalIsOpen, setDeleteNoteModalIsOpen] = useState<boolean>(false);
+  const [selectedNoteId, setSelectedNoteId] = useState<number>(0);
 
-  useEffect(() => {
-        
-    const storagedNotes = localStorage.getItem('@notes');
-
-    if (storagedNotes) {
-        setNotes(JSON.parse(storagedNotes));
-    } 
-
-}, [])
-
-  function openModal() {
-    setModalIsOpen(true);
+  function openNewNoteModal() {
+    setNewNoteModalIsOpen(true);
   }
 
-  function closeModal() {
-    setModalIsOpen(false);
+  function closeNewNoteModal() {
+    setNewNoteModalIsOpen(false);
   }
 
-  function handleSetNotes(value: Note[]) {
-    setNotes(value);
+  function openDeleteNoteModal() {
+    setDeleteNoteModalIsOpen(true);
+  }
+
+  function closeDeleteNoteModal() {
+    setDeleteNoteModalIsOpen(false);
   }
 
   return (
-    <>
-      <Header onOpenModal={openModal} />
+    <NotesContextProvider>
+
+      <Header onOpenModal={openNewNoteModal} />
       <NewNoteModal
-        isOpen={modalIsOpen}
-        onRequestClose={closeModal}
-        onClick={closeModal}
-        notes={notes}
-        onSetNotes={handleSetNotes}
+        isOpen={newNoteModalIsOpen}
+        onRequestClose={closeNewNoteModal}
+        onClick={closeNewNoteModal}
+      />
+      <DeleteNoteModal
+        selectedNote={selectedNoteId} 
+        isOpen={deleteNoteModalIsOpen}
+        onRequestClose={closeDeleteNoteModal}
+        onClick={closeDeleteNoteModal}
       />
       <NotesList 
-        notes={notes}
+        setSelectedNoteId={setSelectedNoteId}
+        onOpenModal={openDeleteNoteModal}
       />
       <GlobalStyle />
-    </>
+
+    </NotesContextProvider>
   )
 }
 
